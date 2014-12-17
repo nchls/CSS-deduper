@@ -1,0 +1,12 @@
+{
+  "name": "CSS-Deduper",
+  "description": "CSS Deduper",
+  "version": "0.0.1",
+  "main": "dedupeCSS.js",
+  "dependencies": {
+    "lodash": "2.4.x",
+    "fs": "*",
+    "css": "*",
+    "q": "*"
+  }
+}
