@@ -108,7 +108,6 @@ var trawlSheets = function(responses) {
 
                                                                     if (dProperty === tProperty) {
 
-/*
                                                                         var rule = _.find(combinedAst.stylesheet.rules, function(rule) {
                                                                             return (rule.position.start.line === dNode.position.start.line && rule.position.start.column === dNode.position.start.column && rule.selectors === dNode.selectors);
                                                                         });
@@ -118,7 +117,6 @@ var trawlSheets = function(responses) {
                                                                         if (rule.declarations.length === 0) {
                                                                             _.pull(combinedAst.stylesheet.rules, rule);
                                                                         }
-*/
                                                                     }
                                                                 }
                                                             });
