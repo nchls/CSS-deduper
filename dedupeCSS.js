@@ -47,8 +47,6 @@ var trawlSheets = function(responses) {
             }
         };
 
-    try {
-
     _.forEach(responses, function(item) {
         _.forEach(item.stylesheet.rules, function(rule) {
             combinedAst.stylesheet.rules.push(rule);
@@ -108,15 +106,21 @@ var trawlSheets = function(responses) {
 
                                                                     if (dProperty === tProperty) {
 
+                                                                        // Duplicate declaration found -- look it up in the combined AST
                                                                         var rule = _.find(combinedAst.stylesheet.rules, function(rule) {
                                                                             return (rule.position.start.line === dNode.position.start.line && rule.position.start.column === dNode.position.start.column && rule.selectors === dNode.selectors);
                                                                         });
+
+                                                                        // Remove property declaration
                                                                         _.remove(rule.declarations, function(declaration) {
                                                                             return (declaration.property === dProperty);
                                                                         });
+
                                                                         if (rule.declarations.length === 0) {
+                                                                            // This rule is now empty -- take it out
                                                                             _.pull(combinedAst.stylesheet.rules, rule);
                                                                         }
+
                                                                     }
                                                                 }
                                                             });
@@ -134,9 +138,6 @@ var trawlSheets = function(responses) {
             });
         }
     });
-    } catch(e) {
-        console.log(e);
-    }
 
     return combinedAst;
 
