@@ -8,12 +8,11 @@ var tabletFlags = [
         '.tablet.rd-rollover-nav2'
     ],
     desktopSheets = [
-        '/input/global.min.css',
         '/input/gnglobal.min.css'
     ];
 
 var init = function(callback) {
-    var stylesheets = ['/input/tablet.min.css'].concat(desktopSheets);
+    var stylesheets = ['/input/tabletcombined.min.css'].concat(desktopSheets);
 
     q.all(_.map(stylesheets, parseSheet)).then(function(responses) {
         combinedAst = trawlSheets(responses);
