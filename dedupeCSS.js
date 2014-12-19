@@ -5,8 +5,7 @@ var _ = require('lodash'),
 
 var tabletFlags = [
         '.tablet',
-        '.tablet.rd-rollover-nav',
-        '.rd-responsive-page'
+        '.tablet.rd-rollover-nav2'
     ],
     desktopSheets = [
         '/input/global.min.css',
@@ -46,25 +45,15 @@ var trawlSheets = function(responses) {
             stylesheet: {
                 rules: []
             }
-        },
-        combinedAstKeys = [];
+        };
 
-    var addNode = _.memoize(function(node) {
-        var selectorsKey = node.selectors.join(',');
-        if (combinedAstKeys.indexOf(selectorsKey) === -1) {
-            combinedAst.stylesheet.rules.push(node);
-            combinedAstKeys.push(selectorsKey);
-        } else {
-            var dupeRule = _.find(combinedAst.stylesheet.rules, {selectors: node.selectors});
-            _.forEach(node.declarations, function(declaration) {
-                var dupeDeclaration = _.find(dupeRule.declarations, {property: declaration.property});
-                if (!dupeDeclaration) {
-                    // Same selectors, but new property -- add it to the AST
-                    dupeRule.declarations.push(declaration);
-                }
-            });
-        }
-    }, JSON.stringify);
+    try {
+
+    _.forEach(responses, function(item) {
+        _.forEach(item.stylesheet.rules, function(rule) {
+            combinedAst.stylesheet.rules.push(rule);
+        });
+    });
 
     _.forEach(tabletSheet, function(tItem) {
 
@@ -72,8 +61,7 @@ var trawlSheets = function(responses) {
 
             _.forEach(tItem.rules, function(tNode) {
 
-                var tNodeCandidate = tNode,
-                    tSelectors = tNode.selectors,
+                var tSelectors = tNode.selectors,
                     tDeclarations = tNode.declarations;
 
                 if (tNode.type === 'rule') {
@@ -94,8 +82,7 @@ var trawlSheets = function(responses) {
 
                                     _.forEach(dItem.rules, function(dNode) {
 
-                                        var dNodeCandidate = _.cloneDeep(dNode),
-                                            dSelectors = dNode.selectors,
+                                        var dSelectors = dNode.selectors,
                                             dDeclarations = dNode.declarations;
 
                                         if (dNode.type === 'rule') {
@@ -110,23 +97,28 @@ var trawlSheets = function(responses) {
                                                     _.forEach(tDeclarations, function(tDeclaration) {
 
                                                         if (tDeclaration.type === 'declaration') {
-                                                            
+
                                                             var tProperty = tDeclaration.property;
 
                                                             _.forEach(dDeclarations, function(dDeclaration) {
 
-                                                                if (dDeclaration.type === 'declaration') {
+                                                                if (dDeclaration && dDeclaration.type === 'declaration') {
 
                                                                     var dProperty = dDeclaration.property;
 
                                                                     if (dProperty === tProperty) {
 
-                                                                        var candidateDeclaration = _.find(dNodeCandidate.declarations, {property: dProperty});
-                                                                        _.pull(dNodeCandidate.declarations, candidateDeclaration);
-                                                                        if (!dNodeCandidate.declarations.length) {
-                                                                            dNodeCandidate = null;
+/*
+                                                                        var rule = _.find(combinedAst.stylesheet.rules, function(rule) {
+                                                                            return (rule.position.start.line === dNode.position.start.line && rule.position.start.column === dNode.position.start.column && rule.selectors === dNode.selectors);
+                                                                        });
+                                                                        _.remove(rule.declarations, function(declaration) {
+                                                                            return (declaration.property === dProperty);
+                                                                        });
+                                                                        if (rule.declarations.length === 0) {
+                                                                            _.pull(combinedAst.stylesheet.rules, rule);
                                                                         }
-
+*/
                                                                     }
                                                                 }
                                                             });
@@ -134,30 +126,19 @@ var trawlSheets = function(responses) {
                                                     });
                                                 }
                                             });
-
-                                            // Add the desktop rule after removing any tablet-overridden declarations
-                                            if (dNodeCandidate) {
-                                                addNode(dNodeCandidate);
-                                            }
-
                                         }
                                     });
                                 }
                             });
                         });
-
-                        // Tablet selector was not found in desktop CSS -- so just add it to the combined
-                        if (!foundMatchingSelector) {
-                            addNode(tNodeCandidate);
-                        }
-
-                        desktopPassCompleted = true;
-
-                    }); 
+                    });
                 }
             });
         }
     });
+    } catch(e) {
+        console.log(e);
+    }
 
     return combinedAst;
 
